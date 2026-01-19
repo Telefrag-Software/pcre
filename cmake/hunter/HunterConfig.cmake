@@ -1,0 +1,30 @@
+include_guard()
+
+hunter_config(BZip2
+	URL "https://github.com/Telefrag-Software/bzip2/archive/refs/heads/hunter-1.1.0.1.zip"
+	VERSION "1.1.0.1"
+	SHA1 "e5c848657e22f7e59165feee281b31aa15d2268d"
+	CMAKE_ARGS
+		ENABLE_APP=OFF
+		ENABLE_TESTS=OFF
+		ENABLE_DOCS=OFF
+		ENABLE_EXAMPLES=OFF
+		ENABLE_STATIC_LIB=ON
+		ENABLE_SHARED_LIB=OFF
+		ENABLE_STATIC_LIB_IS_PIC=ON
+)
+
+hunter_config(ZLIB
+	URL "https://github.com/Telefrag-Software/zlib/archive/refs/heads/hunter-1.3.1.2.zip"
+	VERSION "1.3.1.2"
+	SHA1 "0a8b433ea1eac928a1dfaff3f533dfba61b3aeb9"
+	CMAKE_ARGS
+		ZLIB_BUILD_TESTING=OFF
+		ZLIB_BUILD_SHARED=OFF
+		ZLIB_BUILD_STATIC=ON
+		ZLIB_BUILD_MINIZIP=OFF
+		ZLIB_INSTALL=ON
+		ZLIB_PREFIX=OFF
+		ZLIB_INSTALL_DOCS=OFF
+		ZLIB_INSTALL_LICENSES=OFF
+)

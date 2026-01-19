@@ -116,7 +116,12 @@
 
 # Increased minimum to 3.15 to allow use of string(REPEAT).
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
-project(PCRE2 C)
+
+option(HUNTER_ENABLED "Enables Hunter package manager support." ON)
+
+include(cmake/hunter/HunterInit.cmake)
+
+project(PCRE2 VERSION 10.43 LANGUAGES C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
@@ -148,10 +153,18 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include_directories(${PROJECT_BINARY_DIR}/interface ${PROJECT_BINARY_DIR}/src ${PROJECT_SOURCE_DIR}/src)
 
 # external packages
-find_package(BZip2)
-find_package(ZLIB)
-find_package(Readline)
-find_package(Editline)
+if(HUNTER_ENABLED)
+  hunter_add_package(ZLIB)
+  hunter_add_package(BZip2)
+
+  find_package(ZLIB CONFIG REQUIRED)
+  find_package(BZip2 CONFIG REQUIRED)
+else()
+  find_package(BZip2)
+  find_package(ZLIB)
+  find_package(Readline)
+  find_package(Editline)
+endif()
 
 # Configuration checks
 
@@ -429,7 +442,7 @@ if(HAVE_VSCRIPT)
 endif()
 
 # bzip2 lib
-if(BZIP2_FOUND)
+if(BZIP2_FOUND OR BZip2_FOUND)
   option(PCRE2_SUPPORT_LIBBZ2 "Enable support for linking pcre2grep with libbz2." ON)
 endif()
 if(PCRE2_SUPPORT_LIBBZ2)
@@ -593,12 +606,20 @@ endif()
 
 if(PCRE2_SUPPORT_LIBZ)
   set(SUPPORT_LIBZ 1)
-  list(APPEND PCRE2GREP_LIBS ${ZLIB_LIBRARIES})
+  if(DEFINED ZLIB_LIBRARIES)
+    list(APPEND PCRE2GREP_LIBS ${ZLIB_LIBRARIES})
+  else()
+    list(APPEND PCRE2GREP_LIBS ZLIB::ZLIBSTATIC)
+  endif()
 endif()
 
 if(PCRE2_SUPPORT_LIBBZ2)
   set(SUPPORT_LIBBZ2 1)
-  list(APPEND PCRE2GREP_LIBS ${BZIP2_LIBRARIES})
+  if(DEFINED BZIP2_LIBRARIES)
+    list(APPEND PCRE2GREP_LIBS ${BZIP2_LIBRARIES})
+  else()
+    list(APPEND PCRE2GREP_LIBS BZip2::bz2_static)
+  endif()
 endif()
 
 set(NEWLINE_DEFAULT "")
@@ -1539,7 +1560,7 @@ if(PCRE2_SHOW_REPORT)
   else()
     message(STATUS "  Link pcre2grep with libz .......... : Library not found")
   endif()
-  if(BZIP2_FOUND)
+  if(BZIP2_FOUND OR BZip2_FOUND)
     message(STATUS "  Link pcre2grep with libbz2 ........ : ${PCRE2_SUPPORT_LIBBZ2}")
   else()
     message(STATUS "  Link pcre2grep with libbz2 ........ : Library not found")
