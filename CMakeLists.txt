@@ -117,8 +117,13 @@
 message(STATUS "Using CMake version ${CMAKE_VERSION} (${CMAKE_COMMAND})")
 
 # Increased minimum to 3.15 to allow use of string(REPEAT).
-cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
-project(PCRE2 C)
+cmake_minimum_required(VERSION 3.5...4.2.1 FATAL_ERROR)
+
+option(HUNTER_ENABLED "Enables Hunter package manager support." ON)
+
+include(cmake/hunter/HunterInit.cmake)
+
+project(PCRE2 VERSION 10.43 LANGUAGES C)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 set(CMAKE_C_VISIBILITY_PRESET hidden)
@@ -147,10 +152,18 @@ endif()
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 # External packages
-find_package(BZip2)
-find_package(ZLIB)
-find_package(Readline)
-find_package(Editline)
+if(HUNTER_ENABLED)
+  hunter_add_package(ZLIB)
+  hunter_add_package(BZip2)
+
+  find_package(ZLIB CONFIG REQUIRED)
+  find_package(BZip2 CONFIG REQUIRED)
+else()
+  find_package(BZip2)
+  find_package(ZLIB)
+  find_package(Readline)
+  find_package(Editline)
+endif()
 
 # Configuration checks
 
@@ -623,12 +636,20 @@ endif()
 
 if(PCRE2_SUPPORT_LIBZ)
   set(SUPPORT_LIBZ 1)
-  list(APPEND PCRE2GREP_LIBS ${ZLIB_LIBRARIES})
+  if(DEFINED ZLIB_LIBRARIES)
+    list(APPEND PCRE2GREP_LIBS ${ZLIB_LIBRARIES})
+  else()
+    list(APPEND PCRE2GREP_LIBS ZLIB::ZLIBSTATIC)
+  endif()
 endif()
 
 if(PCRE2_SUPPORT_LIBBZ2)
   set(SUPPORT_LIBBZ2 1)
-  list(APPEND PCRE2GREP_LIBS ${BZIP2_LIBRARIES})
+  if(DEFINED BZIP2_LIBRARIES)
+    list(APPEND PCRE2GREP_LIBS ${BZIP2_LIBRARIES})
+  else()
+    list(APPEND PCRE2GREP_LIBS BZip2::bz2)
+  endif()
 endif()
 
 set(NEWLINE_DEFAULT "")
