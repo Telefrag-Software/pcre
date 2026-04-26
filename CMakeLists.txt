@@ -115,7 +115,7 @@
 ################################################################################
 
 # Increased minimum to 3.15 to allow use of string(REPEAT).
-cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.5...4.2.1 FATAL_ERROR)
 
 option(HUNTER_ENABLED "Enables Hunter package manager support." ON)
 
@@ -158,7 +158,7 @@ if(HUNTER_ENABLED)
   hunter_add_package(BZip2)
 
   find_package(ZLIB CONFIG REQUIRED)
-  find_package(BZip2 CONFIG REQUIRED)
+  find_package(bzip2 CONFIG REQUIRED)
 else()
   find_package(BZip2)
   find_package(ZLIB)
